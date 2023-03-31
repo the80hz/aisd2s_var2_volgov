@@ -7,142 +7,129 @@
 
 #include <iostream>
 
+/**
+ * CustomSet is a set of integers implemented as a binary search tree.
+ */
 class CustomSet {
 public:
-    CustomSet() : root(nullptr) {}
+    /**
+     * @brief Creates an empty set.
+     */
+    CustomSet() : root(nullptr) {} // default constructor
 
-    CustomSet(const CustomSet& other) : root(nullptr) {
-        copyTree(root, other.root);
+    /**
+     * @brief Creates a set from another set.
+     * @param other another set
+     */
+    CustomSet(const CustomSet& other) : root(nullptr) { // copy constructor
+        copyTree(root, other.root); // copy the tree
     }
 
-    ~CustomSet() {
-        clear(root);
-    }
+    /**
+     * @brief Destroys the set.
+     */
+    ~CustomSet(); // destructor
 
-    CustomSet& operator=(const CustomSet& other) {
-        if (this != &other) {
-            clear(root);
-            copyTree(root, other.root);
-        }
-        return *this;
-    }
+    /**
+     * @brief Assigns a set to another set.
+     * @param other another set
+     * @return reference to the set
+     */
+    CustomSet& operator=(const CustomSet& other); // copy assignment
 
-    void print() const {
-        printInOrder(root);
-        std::cout << std::endl;
-    }
+    /**
+     * @brief Prints the set in ascending order.
+     */
+    void print() const; // print the set
 
-    bool insert(int key) {
-        return insert(root, key);
-    }
+    /**
+     * @brief Inserts a key into the set.
+     * @param key key to insert
+     * @return true if the key was inserted, false if the key was already in the set
+     */
+    bool insert(int key); // insert a key
 
-    [[nodiscard]] bool contains(int key) const {
-        return contains(root, key);
-    }
+    /**
+     * @brief Checks if the set contains a key.
+     * @param key key to check
+     * @return true if the set contains the key, false otherwise
+     */
+    [[nodiscard]]
+    bool contains(int key) const; // check if the set contains a key
 
-    bool erase(int key) {
-        return erase(root, key);
-    }
+    /**
+     * @brief Erases a key from the set.
+     * @param key key to erase
+     * @return true if the key was erased, false if the key was not in the set
+     */
+    bool erase(int key); // erase a key
 
 private:
     struct Node {
-        int key;
-        Node* left;
-        Node* right;
+        int key; // key of the node
+        Node* left; // left child
+        Node* right; // right child
 
-        explicit Node(int k) : key(k), left(nullptr), right(nullptr) {}
+        explicit Node(int k) : key(k), left(nullptr), right(nullptr) {} // constructor
     };
 
-    Node* root;
+    Node* root; // root of the tree
 
-    void clear(Node* node) {
-        if (node) {
-            clear(node->left);
-            clear(node->right);
-            delete node;
+    /**
+     * @brief Destroys the tree.
+     * @param node root of the tree
+     */
+    void clear(Node* node); // clear the tree
+
+    /**
+     * @brief Copies a tree.
+     * @param dest root of the destination tree
+     * @param src root of the source tree
+     */
+    void copyTree(Node*& dest, Node* src); // copy the tree
+
+    /**
+     * @brief Prints the tree in ascending order.
+     * @param node root of the tree
+     */
+    void printInOrder(Node* node) const; // print the tree in ascending order
+
+    /**
+     * @brief Inserts a key into the tree.
+     * @param node root of the tree
+     * @param key key to insert
+     * @return true if the key was inserted, false if the key was already in the tree
+     */
+    bool insert(Node*& node, int key); // insert a key
+
+    /**
+     * @brief Checks if the tree contains a key.
+     * @param node root of the tree
+     * @param key key to check
+     * @return true if the tree contains the key, false otherwise
+     */
+    [[nodiscard]]
+    bool contains(Node* node, int key) const; // check if the tree contains a key
+
+    /**
+     * @brief Finds the minimum node in the tree.
+     * @param node root of the tree
+     * @return pointer to the minimum node
+     */
+    static Node* findMin(Node* node) { // find the minimum node in the tree
+        while (node->left) { // go to the leftmost node
+            node = node->left; // go to the left child
         }
+        return node; // return the minimum node
     }
 
-    void copyTree(Node*& dest, Node* src) {
-        if (src) {
-            dest = new Node(src->key);
-            copyTree(dest->left, src->left);
-            copyTree(dest->right, src->right);
-        }
-    }
-
-    void printInOrder(Node* node) const {
-        if (node) {
-            printInOrder(node->left);
-            std::cout << node->key << " ";
-            printInOrder(node->right);
-        }
-    }
-
-    bool insert(Node*& node, int key) {
-        if (!node) {
-            node = new Node(key);
-            return true;
-        }
-
-        if (key < node->key) {
-            return insert(node->left, key);
-        } else if (key > node->key) {
-            return insert(node->right, key);
-        } else {
-            return false; // Element already exists
-        }
-    }
-
-    bool contains(Node* node, int key) const {
-        if (!node) {
-            return false;
-        }
-
-        if (key < node->key) {
-            return contains(node->left, key);
-        } else if (key > node->key) {
-            return contains(node->right, key);
-        } else {
-            return true; // Element found
-        }
-    }
-
-    static Node* findMin(Node* node) {
-        while (node->left) {
-            node = node->left;
-        }
-        return node;
-    }
-
-    bool erase(Node*& node, int key) {
-        if (!node) {
-            return false; // Element not found
-        }
-
-        if (key < node->key) {
-            return erase(node->left, key);
-        } else if (key > node->key) {
-            return erase(node->right, key);
-        } else {
-            if (!node->left && !node->right) {
-                delete node;
-                node = nullptr;
-            } else if (!node->left) {
-                Node* temp = node;
-                node = node->right;
-                delete temp;
-            } else if (!node->right) {
-                Node* temp = node;
-                node = node->left;
-                delete temp;
-            } else {
-                node->key = findMin(node->right)->key;
-                return erase(node->right, node->key);
-            }
-            return true; // Element deleted
-        }
-    }
+    /**
+     * @brief Erases a key from the tree.
+     * @param node root of the tree
+     * @param key key to erase
+     * @return true if the key was erased, false if the key was not in the tree
+     */
+    bool erase(Node*& node, int key); // erase a key
 };
 
 

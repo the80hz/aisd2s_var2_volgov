@@ -4,12 +4,27 @@
 #include <algorithm>
 #include "CustomSet.h"
 
+/**
+ * @brief Linear congruential generator
+ * @return random number
+ */
 size_t lcg() {
     static size_t x = 0;
     x = (1021 * x + 24631) % 116640;
     return x;
 }
 
+/**
+ * @brief Test container
+ * @tparam Container container type
+ * @param containerName container name
+ * @param containerSize container size
+ * @param fillAttempts number of attempts to fill container
+ * @param searchAttempts number of attempts to search in container
+ * @param addRemoveAttempts number of attempts to add/remove from container
+ * @param insertOp insert operation
+ * @param findOp find operation
+ */
 template<typename Container>
 void testContainer(const std::string& containerName,
                    int containerSize,
@@ -19,6 +34,7 @@ void testContainer(const std::string& containerName,
                    std::function<void(Container&, int)> insertOp,
                    std::function<bool(Container&, int)> findOp) {
     using namespace std::chrono;
+
 
     Container container;
     int64_t totalTimeFill = 0;
@@ -46,7 +62,6 @@ void testContainer(const std::string& containerName,
         totalTimeSearch += duration_cast<microseconds>(endSearch - startSearch).count();
     }
 
-
     for (int i = 0; i < addRemoveAttempts; ++i) {
         int randomNum = lcg();
 
@@ -64,7 +79,6 @@ void testContainer(const std::string& containerName,
         totalTimeAddRemove += duration_cast<microseconds>(endAddRemove - startAddRemove).count();
     }
 
-
     std::cout << containerName << " size: " << containerSize << std::endl;
     std::cout << "Average fill time: " << (totalTimeFill / static_cast<double>(fillAttempts)) << " microseconds" << std::endl;
     std::cout << "Average search time: " << (totalTimeSearch / static_cast<double>(searchAttempts)) << " microseconds" << std::endl;
@@ -72,6 +86,10 @@ void testContainer(const std::string& containerName,
     std::cout << std::endl;
 }
 
+/**
+ * @brief Main function
+ * @return exit code
+ */
 int main() {
     int fillAttempts = 100;
     int searchAttempts = 1000;
@@ -98,7 +116,6 @@ int main() {
     testContainer<std::vector<int>>("std::vector<int>", 100000, fillAttempts, searchAttempts, addRemoveAttempts,
                                     [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
                                     [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
-
 
     return 0;
 }
