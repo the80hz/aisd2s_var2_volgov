@@ -2,6 +2,8 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
+#include <map>
+#include <string>
 #include "CustomSet.h"
 
 /**
@@ -29,50 +31,58 @@ template<typename Container>
 void testContainer(const std::string& containerName, int containerSize, int fillAttempts,
                    int searchAttempts, int addRemoveAttempts,
                    std::function<void(Container&, int)> insertOp, std::function<bool(Container&, int)> findOp) {
-    using namespace std::chrono;
+    using namespace std::chrono; // for std::chrono functions
 
 
-    Container container;
-    int64_t totalTimeFill = 0;
-    int64_t totalTimeSearch = 0;
-    int64_t totalTimeAddRemove = 0;
+    Container container;            // Container to test
+    size_t totalTimeFill = 0;       // Total time for filling container
+    size_t totalTimeSearch = 0;     // Total time for searching in container
+    size_t totalTimeAddRemove = 0;  // Total time for adding/removing from container
 
+    // Fill container
     for (int i = 0; i < fillAttempts; ++i) {
-        Container tmpContainer;
-        auto startFill = steady_clock::now();
+        Container tmpContainer;                             // Temporary container for filling
+        auto startFill = steady_clock::now();  // Start time
         for (int j = 0; j < containerSize; ++j) {
-            int randomNum = lcg();
-            if (!findOp(tmpContainer, randomNum)) {
-                insertOp(tmpContainer, randomNum);
-            }
+            int randomNum = lcg();                          // Random number
+            //if (!findOp(tmpContainer, randomNum)) {         // If number is not in container
+                insertOp(tmpContainer, randomNum);          // Insert number
+            //}
         }
-        auto endFill = steady_clock::now();
-        totalTimeFill += duration_cast<microseconds>(endFill - startFill).count();
-        container = tmpContainer;
+        auto endFill = steady_clock::now();    // End time
+        totalTimeFill += duration_cast<microseconds>
+                (endFill - startFill).count();          // Add time to total time
+        container = tmpContainer;                          // Copy temporary container to container
     }
 
+    // Search in container
     for (int i = 0; i < searchAttempts; ++i) {
-        auto startSearch = steady_clock::now();
-        findOp(container, lcg());
-        auto endSearch = steady_clock::now();
-        totalTimeSearch += duration_cast<microseconds>(endSearch - startSearch).count();
+        auto startSearch = steady_clock::now(); // Start time
+        findOp(container, lcg());                            // Search for random number
+        auto endSearch = steady_clock::now();   // End time
+        totalTimeSearch += duration_cast<microseconds>
+                (endSearch - startSearch).count();       // Add time to total time
     }
 
+    // Add/remove from container
     for (int i = 0; i < addRemoveAttempts; ++i) {
-        int randomNum = lcg();
+        int randomNum = lcg(); // Random number
 
-        auto startAddRemove = steady_clock::now();
-        bool found = findOp(container, randomNum);
-        if (!found) {
-            insertOp(container, randomNum);
+        auto startAddRemove = steady_clock::now(); // Start time
+        bool found = findOp(container, randomNum);              // Search for random number
+        if (!found) {                                           // If number is not in container
+            insertOp(container, randomNum);                     // Insert number
         } else {
             // Remove operation not required for CustomSet, only for std::vector
             if constexpr (std::is_same_v<Container, std::vector<int>>) {
-                container.erase(std::remove(container.begin(), container.end(), randomNum), container.end());
+                container.erase(std::remove(container.begin(),
+                                            container.end(), randomNum),
+                                container.end());               // Remove number
             }
         }
-        auto endAddRemove = steady_clock::now();
-        totalTimeAddRemove += duration_cast<microseconds>(endAddRemove - startAddRemove).count();
+        auto endAddRemove = steady_clock::now();    // End time
+        totalTimeAddRemove += duration_cast<microseconds>
+                (endAddRemove - startAddRemove).count();     // Add time to total time
     }
 
     std::cout << containerName << " size: " << containerSize << std::endl;
@@ -148,11 +158,132 @@ void test1(){
                                     [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
 }
 
-/**
- * @brief Main function
- * @return exit code
- */
-int main() {
+void printMenu() {
+    std::cout << "Please choose an option from the menu:\n";
+    std::cout << "1. Create a new tree\n";
+    std::cout << "2. Copy a tree\n";
+    std::cout << "3. Print a tree\n";
+    std::cout << "4. Insert an element into a tree\n";
+    std::cout << "5. Check if an element is in a tree\n";
+    std::cout << "6. Delete an element from a tree\n";
+    std::cout << "7. Union of two trees\n";
+    std::cout << "8. Symmetric difference of two trees\n";
+    std::cout << "9. Exit\n";
+}
 
+int main() {
+    test1();
     return 0;
+    /*std::map<int, CustomSet> trees;
+    int idCounter = 1;
+
+    while (true) {
+        printMenu();
+
+        int choice;
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        int id, id2;
+        int element;
+
+        switch (choice) {
+            case 1:
+                trees[idCounter] = CustomSet();
+                std::cout << "Created tree with ID: " << idCounter << std::endl;
+                idCounter++;
+                break;
+            case 2:
+                std::cout << "Enter the ID of the tree to copy: ";
+                std::cin >> id;
+                if (trees.find(id) == trees.end()) {
+                    std::cout << "Tree not found.\n";
+                } else {
+                    trees[idCounter] = CustomSet(trees[id]);
+                    std::cout << "Copied tree with ID: " << id << " to tree with ID: " << idCounter << std::endl;
+                    idCounter++;
+                }
+                break;
+            case 3:
+                std::cout << "Enter the ID of the tree to print: ";
+                std::cin >> id;
+                if (trees.find(id) == trees.end()) {
+                    std::cout << "Tree not found.\n";
+                } else {
+                    trees[id].print();
+                }
+                break;
+            case 4:
+                std::cout << "Enter the ID of the tree to insert the element into: ";
+                std::cin >> id;
+                std::cout << "Enter the element to insert: ";
+                std::cin >> element;
+                if (trees.find(id) == trees.end()) {
+                    std::cout << "Tree not found.\n";
+                } else {
+                    trees[id].insert(element);
+                    std::cout << "Inserted element " << element << " into tree with ID: " << id << std::endl;
+                }
+                break;
+            case 5:
+                std::cout << "Enter the ID of the tree to check for the presence of an element: ";
+                std::cin >> id;
+                std::cout << "Enter the element to check: ";
+                std::cin >> element;
+                if (trees.find(id) == trees.end()) {
+                    std::cout << "Tree not found.\n";
+                } else {
+                    bool found = trees[id].contains(element);
+                    if (found) {
+                        std::cout << "Element " << element << " is present in tree with ID: " << id << std::endl;
+                    } else {
+                        std::cout << "Element " << element << " is not present in tree with ID: " << id << std::endl;
+                    }
+                }
+                break;
+            case 6:
+                std::cout << "Enter the ID of the tree to delete an element from: ";
+                std::cin >> id;
+                std::cout << "Enter the element to delete: ";
+                std::cin >> element;
+                if (trees.find(id) == trees.end()) {
+                    std::cout << "Tree not found.\n";
+                } else {
+                    bool deleted = trees[id].erase(element);
+                    if (deleted) {
+                        std::cout << "Deleted element " << element << " from tree with ID: " << id << std::endl;
+                    } else {
+                        std::cout << "Element " << element << " not found in tree with ID: " << id << std::endl;
+                    }
+                }
+                break;
+            case 7:
+                std::cout << "Enter the IDs of the trees to perform the union operation: ";
+                std::cin >> id >> id2;
+                if (trees.find(id) == trees.end() || trees.find(id2) == trees.end()) {
+                    std::cout << "One or both tree IDs not found.\n";
+                } else {
+                    trees[idCounter] = customSetUnion(trees[id], trees[id2]);
+                    std::cout << "Created new tree with ID: " << idCounter << " as the union of trees with IDs: " << id << " and " << id2 << std::endl;
+                    idCounter++;
+                }
+                break;
+            case 8:
+                std::cout << "Enter the IDs of the trees to perform the symmetric difference operation: ";
+                std::cin >> id >> id2;
+                if (trees.find(id) == trees.end() || trees.find(id2) == trees.end()) {
+                    std::cout << "One or both tree IDs not found.\n";
+                } else {
+                    trees[idCounter] = customSetSymmetricDifference(trees[id], trees[id2]);
+                    std::cout << "Created new tree with ID: " << idCounter << " as the symmetric difference of trees with IDs: " << id << " and " << id2 << std::endl;
+                    idCounter++;
+                }
+                break;
+            case 9:
+                std::cout << "Exiting...\n";
+                return 0;
+            default:
+                std::cout << "Invalid choice. Please try again.\n";
+        }
+    }*/
 }
