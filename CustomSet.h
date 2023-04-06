@@ -87,20 +87,20 @@ private:
      * @brief Destroys the tree.
      * @param node root of the tree
      */
-    void clear(Node* node); // clear the tree
+    static void clear(Node* node); // clear the tree
 
     /**
      * @brief Copies a tree.
      * @param dest root of the destination tree
      * @param src root of the source tree
      */
-    void copyTree(Node*& dest, Node* src); // copy the tree
+    static void copyTree(Node*& dest, const Node* src); // copy the tree
 
     /**
      * @brief Prints the tree in ascending order.
      * @param node root of the tree
      */
-    void printInOrder(Node* node) const; // print the tree in ascending order
+    static void printInOrder(const Node* node); // print the tree in ascending order
 
     /**
      * @brief Inserts a key into the tree.
@@ -108,7 +108,7 @@ private:
      * @param key key to insert
      * @return true if the key was inserted, false if the key was already in the tree
      */
-    bool insert(Node*& node, int key); // insert a key
+    static bool insert(Node*& node, int key); // insert a key
 
     /**
      * @brief Checks if the tree contains a key.
@@ -117,7 +117,7 @@ private:
      * @return true if the tree contains the key, false otherwise
      */
     [[nodiscard]]
-    bool contains(Node* node, int key) const; // check if the tree contains a key
+    static bool contains(const Node* node, int key); // check if the tree contains a key
 
     /**
      * @brief Finds the minimum node in the tree.
@@ -137,14 +137,14 @@ private:
      * @param key key to erase
      * @return true if the key was erased, false if the key was not in the tree
      */
-    bool erase(Node*& node, int key); // erase a key
+    static bool erase(Node*& node, int key); // erase a key
 
     /**
      * @brief Traverses the tree in ascending order.
      * @param node root of the tree
      * @param elements vector to store the elements
      */
-    void inorderTraversal(Node* node, std::vector<int>& elements) const; // traverse the tree in ascending order
+    void inorderTraversal(Node* node, std::vector<int>& elements) const; // traverse the tree in ascending order2
 };
 
 
