@@ -33,11 +33,10 @@ void testContainer(const std::string& containerName, int containerSize, int fill
                    std::function<void(Container&, int)> insertOp, std::function<bool(Container&, int)> findOp) {
     using namespace std::chrono; // for std::chrono functions
 
-
     Container container;            // Container to test
-    size_t totalTimeFill = 0;       // Total time for filling container
-    size_t totalTimeSearch = 0;     // Total time for searching in container
-    size_t totalTimeAddRemove = 0;  // Total time for adding/removing from container
+    duration<double, std::milli> totalTimeFill{};       // Total time for filling container
+    duration<double, std::milli> totalTimeSearch{};     // Total time for searching in container
+    duration<double, std::milli> totalTimeAddRemove{};  // Total time for adding/removing from container
 
     // Fill container
     for (int i = 0; i < fillAttempts; ++i) {
@@ -45,13 +44,10 @@ void testContainer(const std::string& containerName, int containerSize, int fill
         auto startFill = steady_clock::now();  // Start time
         for (int j = 0; j < containerSize; ++j) {
             int randomNum = lcg();                          // Random number
-            //if (!findOp(tmpContainer, randomNum)) {         // If number is not in container
-                insertOp(tmpContainer, randomNum);          // Insert number
-            //}
+            insertOp(tmpContainer, randomNum);          // Insert number
         }
         auto endFill = steady_clock::now();    // End time
-        totalTimeFill += duration_cast<microseconds>
-                (endFill - startFill).count();          // Add time to total time
+        totalTimeFill += duration_cast<duration<double, std::milli>>(endFill - startFill); // Add time to total time
         container = tmpContainer;                          // Copy temporary container to container
     }
 
@@ -60,8 +56,7 @@ void testContainer(const std::string& containerName, int containerSize, int fill
         auto startSearch = steady_clock::now(); // Start time
         findOp(container, lcg());                            // Search for random number
         auto endSearch = steady_clock::now();   // End time
-        totalTimeSearch += duration_cast<microseconds>
-                (endSearch - startSearch).count();       // Add time to total time
+        totalTimeSearch += duration_cast<duration<double, std::milli>>(endSearch - startSearch); // Add time to total time
     }
 
     // Add/remove from container
@@ -76,20 +71,49 @@ void testContainer(const std::string& containerName, int containerSize, int fill
             // Remove operation not required for CustomSet, only for std::vector
             if constexpr (std::is_same_v<Container, std::vector<int>>) {
                 container.erase(std::remove(container.begin(),
-                                            container.end(), randomNum),
-                                container.end());               // Remove number
+                                            container.end(), randomNum), container.end());    // Remove number
             }
         }
         auto endAddRemove = steady_clock::now();    // End time
-        totalTimeAddRemove += duration_cast<microseconds>
-                (endAddRemove - startAddRemove).count();     // Add time to total time
+        totalTimeAddRemove += duration_cast<duration<double, std::milli>>(endAddRemove - startAddRemove); // Add time to total time
     }
 
     std::cout << containerName << " size: " << containerSize << std::endl;
-    std::cout << "Average fill time: " << (totalTimeFill / static_cast<double>(fillAttempts)) << " microseconds" << std::endl;
-    std::cout << "Average search time: " << (totalTimeSearch / static_cast<double>(searchAttempts)) << " microseconds" << std::endl;
-    std::cout << "Average add/remove time: " << (totalTimeAddRemove / static_cast<double>(addRemoveAttempts)) << " microseconds" << std::endl;
+    std::cout << "Average fill time: " << totalTimeFill.count() / fillAttempts << " ms" << std::endl;
+    std::cout << "Average search time: " << totalTimeSearch.count() / searchAttempts << " ms" << std::endl;
+    std::cout << "Average add/remove time: " << totalTimeAddRemove.count() / addRemoveAttempts << " ms" << std::endl;
     std::cout << std::endl;
+}
+
+/**
+* @brief Test function for CustomSet and std::vector containers with different sizes
+*/
+void test1(){
+    int fillAttempts = 100;
+    int searchAttempts = 1000;
+    int addRemoveAttempts = 1000;
+
+    testContainer<CustomSet>("CustomSet", 1000, fillAttempts, searchAttempts, addRemoveAttempts,
+                             [](CustomSet& container, int value) { container.insert(value); },
+                             [](CustomSet& container, int value) { return container.contains(value); });
+
+    testContainer<std::vector<int>>("std::vector<int>", 1000, fillAttempts, searchAttempts, addRemoveAttempts,
+                                    [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
+                                    [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
+    testContainer<CustomSet>("CustomSet", 10000, fillAttempts, searchAttempts, addRemoveAttempts,
+                             [](CustomSet& container, int value) { container.insert(value); },
+                             [](CustomSet& container, int value) { return container.contains(value); });
+
+    testContainer<std::vector<int>>("std::vector<int>", 10000, fillAttempts, searchAttempts, addRemoveAttempts,
+                                    [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
+                                    [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
+    testContainer<CustomSet>("CustomSet", 100000, fillAttempts, searchAttempts, addRemoveAttempts,
+                             [](CustomSet& container, int value) { container.insert(value); },
+                             [](CustomSet& container, int value) { return container.contains(value); });
+
+    testContainer<std::vector<int>>("std::vector<int>", 100000, fillAttempts, searchAttempts, addRemoveAttempts,
+                                    [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
+                                    [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
 }
 
 /**
@@ -127,37 +151,6 @@ CustomSet customSetSymmetricDifference(const CustomSet& set1, const CustomSet& s
     return result; // Return the result
 }
 
-/**
- * @brief Test function for CustomSet and std::vector containers with different sizes
- */
-void test1(){
-    int fillAttempts = 100;
-    int searchAttempts = 1000;
-    int addRemoveAttempts = 1000;
-
-    testContainer<CustomSet>("CustomSet", 1000, fillAttempts, searchAttempts, addRemoveAttempts,
-                             [](CustomSet& container, int value) { container.insert(value); },
-                             [](CustomSet& container, int value) { return container.contains(value); });
-
-    testContainer<std::vector<int>>("std::vector<int>", 1000, fillAttempts, searchAttempts, addRemoveAttempts,
-                                    [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
-                                    [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
-    testContainer<CustomSet>("CustomSet", 10000, fillAttempts, searchAttempts, addRemoveAttempts,
-                             [](CustomSet& container, int value) { container.insert(value); },
-                             [](CustomSet& container, int value) { return container.contains(value); });
-
-    testContainer<std::vector<int>>("std::vector<int>", 10000, fillAttempts, searchAttempts, addRemoveAttempts,
-                                    [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
-                                    [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
-    testContainer<CustomSet>("CustomSet", 100000, fillAttempts, searchAttempts, addRemoveAttempts,
-                             [](CustomSet& container, int value) { container.insert(value); },
-                             [](CustomSet& container, int value) { return container.contains(value); });
-
-    testContainer<std::vector<int>>("std::vector<int>", 100000, fillAttempts, searchAttempts, addRemoveAttempts,
-                                    [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
-                                    [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
-}
-
 void printMenu() {
     std::cout << "Please choose an option from the menu:\n";
     std::cout << "1. Create a new tree\n";
@@ -172,7 +165,7 @@ void printMenu() {
 }
 
 int main() {
-    // test1();
+    test1();
     std::map<int, CustomSet> trees;
     int idCounter = 1;
 
