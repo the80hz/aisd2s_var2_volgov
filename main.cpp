@@ -15,10 +15,12 @@
  * Функции сортировки должны принимать std::vector<int> - сортируемый набор элементов.
  */
 
-#include <iostream>
-#include <vector>
-#include <chrono>
+#include <thread>
 #include <random>
+#include <array>
+#include <iostream>
+#include <future>
+
 
 struct stats {
     size_t comparison_count = 0;
@@ -76,12 +78,13 @@ std::vector<int> generate_random_array(size_t size) {
     std::vector<int> result(size);
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, 1000000);
+    std::uniform_int_distribution<> dis(0, size);
     for (size_t i = 0; i < size; ++i) {
         result[i] = dis(gen);
     }
     return result;
 }
+
 
 // Генератор отсортированных чисел
 std::vector<int> generate_sorted_array(size_t size) {
@@ -133,24 +136,34 @@ statistics get_statistics(std::vector<int> &array, size_t count) {
 }
 
 int main() {
-    std::vector<size_t> sizes = {1000, 2000, 3000, 4000, 5000, 6000, 7000,
-                                 8000, 9000, 10000, 25000, 50000, 100000};
+    std::vector<size_t> sizes = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 25000, 50000, 100000};
     std::vector<statistics> selection_sort_statistics(sizes.size());
     std::vector<statistics> quick_sort_statistics(sizes.size());
+    std::vector<std::future<std::vector<int>>> futures(sizes.size());
+
+    // Запускаем асинхронные задачи для генерации массивов
     for (size_t i = 0; i < sizes.size(); ++i) {
-        std::vector<int> random_array = generate_random_array(sizes[i]);
+        futures[i] = std::async(std::launch::async, generate_random_array, sizes[i]);
+    }
+
+    // Получаем сгенерированные массивы и собираем статистику
+    for (size_t i = 0; i < sizes.size(); ++i) {
+        std::cout << "Генерация массива размером " << sizes[i] << " элементов\n";
+        std::vector<int> random_array = futures[i].get();
         std::vector<int> sorted_array = generate_sorted_array(sizes[i]);
         std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(sizes[i]);
         selection_sort_statistics[i] = get_statistics(random_array, 100);
         quick_sort_statistics[i] = get_statistics(random_array, 100);
     }
+
     std::cout << "Размер массива\tСравнений\tКопирований\tСравнений\tКопирований\n";
     for (size_t i = 0; i < sizes.size(); ++i) {
-        std::cout << sizes[i] << "\t\t\t" << selection_sort_statistics[i].average_comparison_count << "\t\t\t"
-                  << selection_sort_statistics[i].average_copy_count << "\t\t\t"
-                  << quick_sort_statistics[i].average_comparison_count << "\t\t\t"
+        std::cout << sizes[i] << "\t\t" << selection_sort_statistics[i].average_comparison_count << "\t\t"
+                  << selection_sort_statistics[i].average_copy_count << "\t\t"
+                  << quick_sort_statistics[i].average_comparison_count << "\t\t"
                   << quick_sort_statistics[i].average_copy_count << "\n";
     }
 
     return 0;
 }
+
