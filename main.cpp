@@ -126,6 +126,7 @@ void perform_testing(const std::string& filename) {
     outfile << "Array Size,Comparison Count (Selection Sort - Random),Copy Count (Selection Sort - Random),Comparison Count (Selection Sort - Sorted),Copy Count (Selection Sort - Sorted),Comparison Count (Selection Sort - Reverse Sorted),Copy Count (Selection Sort - Reverse Sorted),Comparison Count (Quick Sort - Random),Copy Count (Quick Sort - Random),Comparison Count (Quick Sort - Sorted),Copy Count (Quick Sort - Sorted),Comparison Count (Quick Sort - Reverse Sorted),Copy Count (Quick Sort - Reverse Sorted)\n";
 
     for (size_t size : sizes) {
+        std::cout << std::endl << size << std::endl;
         std::vector<double> selection_random_comparison_counts;
         std::vector<double> selection_random_copy_counts;
         std::vector<double> selection_sorted_comparison_counts;
@@ -141,33 +142,37 @@ void perform_testing(const std::string& filename) {
         std::vector<double> quick_reverse_sorted_copy_counts;
 
         for (size_t i = 0; i < 100; ++i) {
+            std::cout << i << " ";
             std::vector<int> random_array = generate_random_array(size);
-            std::vector<int> sorted_array = generate_sorted_array(size);
-            std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
 
             stats selection_random_stats = selection_sort(random_array);
             selection_random_comparison_counts.push_back(selection_random_stats.comparison_count);
             selection_random_copy_counts.push_back(selection_random_stats.copy_count);
 
-            stats selection_sorted_stats = selection_sort(sorted_array);
-            selection_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
-            selection_sorted_copy_counts.push_back(selection_sorted_stats.copy_count);
-
-            stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
-            selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
-            selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
-
             stats quick_random_stats = quick_sort(random_array);
             quick_random_comparison_counts.push_back(quick_random_stats.comparison_count);
             quick_random_copy_counts.push_back(quick_random_stats.copy_count);
 
-            stats quick_sorted_stats = quick_sort(sorted_array);
-            quick_sorted_copy_counts.push_back(quick_sorted_stats.copy_count);
 
-            stats quick_reverse_sorted_stats = quick_sort(reverse_sorted_array);
-            quick_reverse_sorted_comparison_counts.push_back(quick_reverse_sorted_stats.comparison_count);
-            quick_reverse_sorted_copy_counts.push_back(quick_reverse_sorted_stats.copy_count);
         }
+        std::vector<int> sorted_array = generate_sorted_array(size);
+        std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
+
+        stats selection_sorted_stats = selection_sort(sorted_array);
+        selection_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
+        selection_sorted_copy_counts.push_back(selection_sorted_stats.copy_count);
+
+        stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
+        selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
+        selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
+
+        stats quick_sorted_stats = quick_sort(sorted_array);
+        quick_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
+        quick_sorted_copy_counts.push_back(quick_sorted_stats.copy_count);
+
+        stats quick_reverse_sorted_stats = quick_sort(reverse_sorted_array);
+        quick_reverse_sorted_comparison_counts.push_back(quick_reverse_sorted_stats.comparison_count);
+        quick_reverse_sorted_copy_counts.push_back(quick_reverse_sorted_stats.copy_count);
 
         outfile << size << ","
                 << calculate_average(selection_random_comparison_counts) << ","
@@ -201,6 +206,10 @@ void show_menu() {
 }
 
 int main() {
+    std::string filename = "sorting_results.csv";
+    perform_testing(filename);
+
+    /*
     while (true) {
         show_menu();
 
@@ -244,7 +253,7 @@ int main() {
         }
 
         std::cout << std::endl;
-    }
+    }*/
 
     return 0;
 }
