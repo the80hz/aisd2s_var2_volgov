@@ -6,7 +6,7 @@
  *  в) для обратно отсортированного массива.
  *
  * Минимальные требования:
- * Запрещено использование функций из заголовочных файлов <alogprithm> и <numeric>.
+ * Запрещено использование функций из заголовочных файлов <algorithm> и <numeric>.
  * Функции сортировки должны возвращать структуру stats:
  * struct stats {
  *  size_t comparison_count = 0;
@@ -15,11 +15,10 @@
  * Функции сортировки должны принимать std::vector<int> - сортируемый набор элементов.
  */
 
-#include <thread>
 #include <random>
-#include <array>
 #include <iostream>
-#include <future>
+#include <fstream>
+#include <vector>
 
 
 struct stats {
@@ -104,66 +103,148 @@ std::vector<int> generate_reverse_sorted_array(size_t size) {
     return result;
 }
 
-// Среднее значение
-double average(std::vector<double> &array) {
-    double result = 0;
-    for (size_t i = 0; i < array.size(); ++i) {
-        result += array[i];
+
+// Function to calculate the average of a vector
+double calculate_average(const std::vector<double>& array) {
+    double sum = 0;
+    for (double value : array) {
+        sum += value;
     }
-    return result / array.size();
+    return sum / array.size();
 }
 
-// Статистика
-struct statistics {
-    double average_comparison_count = 0;
-    double average_copy_count = 0;
-};
+// Function to perform the testing and write results to a CSV file
+void perform_testing(const std::string& filename) {
+    std::vector<size_t> sizes = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 25000, 50000, 100000 };
 
-// Статистика для массива
-statistics get_statistics(std::vector<int> &array, size_t count) {
-    std::vector<double> comparison_count(count);
-    std::vector<double> copy_count(count);
-    for (size_t i = 0; i < count; ++i) {
-        std::vector<int> copy = array;
-        stats result = selection_sort(copy);
-        comparison_count[i] = result.comparison_count;
-        copy_count[i] = result.copy_count;
+    std::ofstream outfile(filename);
+    if (!outfile) {
+        std::cerr << "Failed to open the file." << std::endl;
+        return;
     }
-    statistics result;
-    result.average_comparison_count = average(comparison_count);
-    result.average_copy_count = average(copy_count);
-    return result;
+
+    outfile << "Array Size,Comparison Count (Selection Sort - Random),Copy Count (Selection Sort - Random),Comparison Count (Selection Sort - Sorted),Copy Count (Selection Sort - Sorted),Comparison Count (Selection Sort - Reverse Sorted),Copy Count (Selection Sort - Reverse Sorted),Comparison Count (Quick Sort - Random),Copy Count (Quick Sort - Random),Comparison Count (Quick Sort - Sorted),Copy Count (Quick Sort - Sorted),Comparison Count (Quick Sort - Reverse Sorted),Copy Count (Quick Sort - Reverse Sorted)\n";
+
+    for (size_t size : sizes) {
+        std::vector<double> selection_random_comparison_counts;
+        std::vector<double> selection_random_copy_counts;
+        std::vector<double> selection_sorted_comparison_counts;
+        std::vector<double> selection_sorted_copy_counts;
+        std::vector<double> selection_reverse_sorted_comparison_counts;
+        std::vector<double> selection_reverse_sorted_copy_counts;
+
+        std::vector<double> quick_random_comparison_counts;
+        std::vector<double> quick_random_copy_counts;
+        std::vector<double> quick_sorted_comparison_counts;
+        std::vector<double> quick_sorted_copy_counts;
+        std::vector<double> quick_reverse_sorted_comparison_counts;
+        std::vector<double> quick_reverse_sorted_copy_counts;
+
+        for (size_t i = 0; i < 100; ++i) {
+            std::vector<int> random_array = generate_random_array(size);
+            std::vector<int> sorted_array = generate_sorted_array(size);
+            std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
+
+            stats selection_random_stats = selection_sort(random_array);
+            selection_random_comparison_counts.push_back(selection_random_stats.comparison_count);
+            selection_random_copy_counts.push_back(selection_random_stats.copy_count);
+
+            stats selection_sorted_stats = selection_sort(sorted_array);
+            selection_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
+            selection_sorted_copy_counts.push_back(selection_sorted_stats.copy_count);
+
+            stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
+            selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
+            selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
+
+            stats quick_random_stats = quick_sort(random_array);
+            quick_random_comparison_counts.push_back(quick_random_stats.comparison_count);
+            quick_random_copy_counts.push_back(quick_random_stats.copy_count);
+
+            stats quick_sorted_stats = quick_sort(sorted_array);
+            quick_sorted_copy_counts.push_back(quick_sorted_stats.copy_count);
+
+            stats quick_reverse_sorted_stats = quick_sort(reverse_sorted_array);
+            quick_reverse_sorted_comparison_counts.push_back(quick_reverse_sorted_stats.comparison_count);
+            quick_reverse_sorted_copy_counts.push_back(quick_reverse_sorted_stats.copy_count);
+        }
+
+        outfile << size << ","
+                << calculate_average(selection_random_comparison_counts) << ","
+                << calculate_average(selection_random_copy_counts) << ","
+                << calculate_average(selection_sorted_comparison_counts) << ","
+                << calculate_average(selection_sorted_copy_counts) << ","
+                << calculate_average(selection_reverse_sorted_comparison_counts) << ","
+                << calculate_average(selection_reverse_sorted_copy_counts) << ","
+                << calculate_average(quick_random_comparison_counts) << ","
+                << calculate_average(quick_random_copy_counts) << ","
+                << calculate_average(quick_sorted_comparison_counts) << ","
+                << calculate_average(quick_sorted_copy_counts) << ","
+                << calculate_average(quick_reverse_sorted_comparison_counts) << ","
+                << calculate_average(quick_reverse_sorted_copy_counts) << "\n";
+    }
+
+    outfile.close();
+
+    std::cout << "Testing completed. Results are saved in " << filename << std::endl;
+}
+
+
+// Function to display the menu
+void show_menu() {
+    std::cout << "Menu:\n";
+    std::cout << "1. Compare sorting algorithms for a random array\n";
+    std::cout << "2. Compare sorting algorithms for a sorted array\n";
+    std::cout << "3. Compare sorting algorithms for a reverse sorted array\n";
+    std::cout << "0. Exit\n";
+    std::cout << "Enter your choice: ";
 }
 
 int main() {
-    std::vector<size_t> sizes = {1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 25000, 50000, 100000};
-    std::vector<statistics> selection_sort_statistics(sizes.size());
-    std::vector<statistics> quick_sort_statistics(sizes.size());
-    std::vector<std::future<std::vector<int>>> futures(sizes.size());
+    while (true) {
+        show_menu();
 
-    // Запускаем асинхронные задачи для генерации массивов
-    for (size_t i = 0; i < sizes.size(); ++i) {
-        futures[i] = std::async(std::launch::async, generate_random_array, sizes[i]);
-    }
+        int choice;
+        std::cin >> choice;
 
-    // Получаем сгенерированные массивы и собираем статистику
-    for (size_t i = 0; i < sizes.size(); ++i) {
-        std::cout << "Генерация массива размером " << sizes[i] << " элементов\n";
-        std::vector<int> random_array = futures[i].get();
-        std::vector<int> sorted_array = generate_sorted_array(sizes[i]);
-        std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(sizes[i]);
-        selection_sort_statistics[i] = get_statistics(random_array, 100);
-        quick_sort_statistics[i] = get_statistics(random_array, 100);
-    }
+        if (choice == 0) {
+            break;
+        } else if (choice >= 1 && choice <= 3) {
+            size_t array_size;
+            std::cout << "Enter the array size: ";
+            std::cin >> array_size;
 
-    std::cout << "Размер массива\tСравнений\tКопирований\tСравнений\tКопирований\n";
-    for (size_t i = 0; i < sizes.size(); ++i) {
-        std::cout << sizes[i] << "\t\t" << selection_sort_statistics[i].average_comparison_count << "\t\t"
-                  << selection_sort_statistics[i].average_copy_count << "\t\t"
-                  << quick_sort_statistics[i].average_comparison_count << "\t\t"
-                  << quick_sort_statistics[i].average_copy_count << "\n";
+            std::vector<int> array;
+            std::string array_type;
+
+            if (choice == 1) {
+                array = generate_random_array(array_size);
+                array_type = "random";
+            } else if (choice == 2) {
+                array = generate_sorted_array(array_size);
+                array_type = "sorted";
+            } else if (choice == 3) {
+                array = generate_reverse_sorted_array(array_size);
+                array_type = "reverse sorted";
+            }
+
+            stats selection_sort_stats = selection_sort(array);
+            stats quick_sort_stats = quick_sort(array);
+
+            std::cout << "Comparisons and copies for a " << array_type << " array of size " << array_size << ":\n";
+            std::cout << "Selection Sort:\n";
+            std::cout << "Comparison count: " << selection_sort_stats.comparison_count << std::endl;
+            std::cout << "Copy count: " << selection_sort_stats.copy_count << std::endl;
+
+            std::cout << "Quick Sort:\n";
+            std::cout << "Comparison count: " << quick_sort_stats.comparison_count << std::endl;
+            std::cout << "Copy count: " << quick_sort_stats.copy_count << std::endl;
+        } else {
+            std::cout << "Invalid choice. Please try again.\n";
+        }
+
+        std::cout << std::endl;
     }
 
     return 0;
 }
-
