@@ -27,57 +27,69 @@ struct stats {
 };
 
 // Сортировка выбором
-stats selection_sort(std::vector<int> &array) {
-    stats result;
+stats selection_sort(std::vector<int>& array) {
+    stats sort_stats;
+
     for (size_t i = 0; i < array.size() - 1; ++i) {
         size_t min_index = i;
+
         for (size_t j = i + 1; j < array.size(); ++j) {
-            ++result.comparison_count;
+            ++sort_stats.comparison_count;
             if (array[j] < array[min_index]) {
                 min_index = j;
             }
         }
-        ++result.copy_count;
-        std::swap(array[i], array[min_index]);
-    }
-    return result;
-}
 
-// Быстрая сортировка
-stats quick_sort(std::vector<int> &array) {
-    stats result;
-    if (array.size() < 2) {
-        return result;
-    }
-    int pivot = array[array.size() / 2];
-    std::vector<int> less;
-    std::vector<int> greater;
-    for (size_t i = 0; i < array.size(); ++i) {
-        ++result.comparison_count;
-        if (array[i] < pivot) {
-            ++result.copy_count;
-            less.push_back(array[i]);
-        } else if (array[i] > pivot) {
-            ++result.copy_count;
-            greater.push_back(array[i]);
+        if (min_index != i) {
+            std::swap(array[i], array[min_index]);
+            ++sort_stats.copy_count;
         }
     }
-    stats less_stats = quick_sort(less);
-    stats greater_stats = quick_sort(greater);
-    result.comparison_count += less_stats.comparison_count + greater_stats.comparison_count;
-    result.copy_count += less_stats.copy_count + greater_stats.copy_count;
-    std::copy(less.begin(), less.end(), array.begin());
-    array[less.size()] = pivot;
-    std::copy(greater.begin(), greater.end(), array.begin() + less.size() + 1);
-    return result;
+
+    return sort_stats;
 }
+
+size_t partition(std::vector<int>& arr, size_t low, size_t high, stats& sort_stats) {
+    int pivot = arr[high];
+    size_t i = low - 1;
+
+    for (size_t j = low; j <= high - 1; ++j) {
+        ++sort_stats.comparison_count;
+        if (arr[j] < pivot) {
+            ++i;
+            std::swap(arr[i], arr[j]);
+            ++sort_stats.copy_count;
+        }
+    }
+
+    std::swap(arr[i + 1], arr[high]);
+    ++sort_stats.copy_count;
+
+    return i + 1;
+}
+
+void quickSort(std::vector<int>& arr, size_t low, size_t high, stats& sort_stats) {
+    if (low < high) {
+        size_t pivot_index = partition(arr, low, high, sort_stats);
+
+        quickSort(arr, low, pivot_index - 1, sort_stats);
+        quickSort(arr, pivot_index + 1, high, sort_stats);
+    }
+}
+
+stats quick_sort(std::vector<int>& arr) {
+    stats sort_stats;
+    quickSort(arr, 0, arr.size() - 1, sort_stats);
+    return sort_stats;
+}
+
 
 // Генератор случайных чисел
 std::vector<int> generate_random_array(size_t size) {
     std::vector<int> result(size);
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, size);
+    std::uniform_int_distribution<> dis(0, size-1);
     for (size_t i = 0; i < size; ++i) {
         result[i] = dis(gen);
     }
@@ -115,7 +127,7 @@ double calculate_average(const std::vector<double>& array) {
 
 // Function to perform the testing and write results to a CSV file
 void perform_testing(const std::string& filename) {
-    std::vector<size_t> sizes = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 25000, 50000, 100000 };
+    std::vector<size_t> sizes = { 50 };
 
     std::ofstream outfile(filename);
     if (!outfile) {
