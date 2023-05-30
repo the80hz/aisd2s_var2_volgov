@@ -49,38 +49,42 @@ stats selection_sort(std::vector<int>& array) {
     return sort_stats;
 }
 
-size_t partition(std::vector<int>& arr, size_t low, size_t high, stats& sort_stats) {
-    int pivot = arr[high];
-    size_t i = low - 1;
 
-    for (size_t j = low; j <= high - 1; ++j) {
+stats quick_sort_helper(std::vector<int>& array, int left, int right) {
+    stats sort_stats;
+    int i = left, j = right;
+    int tmp;
+    int pivot = array[(left + right) / 2];
+
+    while (i <= j) {
         ++sort_stats.comparison_count;
-        if (arr[j] < pivot) {
-            ++i;
-            std::swap(arr[i], arr[j]);
+        while (array[i] < pivot)
+            i++;
+        ++sort_stats.comparison_count;
+        while (array[j] > pivot)
+            j--;
+        ++sort_stats.comparison_count;
+        if (i <= j) {
             ++sort_stats.copy_count;
+            tmp = array[i];
+            array[i] = array[j];
+            array[j] = tmp;
+            i++;
+            j--;
         }
     }
 
-    std::swap(arr[i + 1], arr[high]);
-    ++sort_stats.copy_count;
+    if (left < j)
+        quick_sort_helper(array, left, j);
+    if (i < right)
+        quick_sort_helper(array, i, right);
 
-    return i + 1;
-}
-
-void quickSort(std::vector<int>& arr, size_t low, size_t high, stats& sort_stats) {
-    if (low < high) {
-        size_t pivot_index = partition(arr, low, high, sort_stats);
-
-        quickSort(arr, low, pivot_index - 1, sort_stats);
-        quickSort(arr, pivot_index + 1, high, sort_stats);
-    }
-}
-
-stats quick_sort(std::vector<int>& arr) {
-    stats sort_stats;
-    quickSort(arr, 0, arr.size() - 1, sort_stats);
     return sort_stats;
+}
+
+// quick sort
+stats quick_sort(std::vector<int>& array) {
+    return quick_sort_helper(array, 0, array.size() - 1);
 }
 
 
@@ -127,7 +131,7 @@ double calculate_average(const std::vector<double>& array) {
 
 // Function to perform the testing and write results to a CSV file
 void perform_testing(const std::string& filename) {
-    std::vector<size_t> sizes = { 50 };
+    std::vector<size_t> sizes = { 10, 40, 80, 100, 120, 160, 200, 250, 300 };
 
     std::ofstream outfile(filename);
     if (!outfile) {
@@ -135,7 +139,13 @@ void perform_testing(const std::string& filename) {
         return;
     }
 
-    outfile << "Array Size,Comparison Count (Selection Sort - Random),Copy Count (Selection Sort - Random),Comparison Count (Selection Sort - Sorted),Copy Count (Selection Sort - Sorted),Comparison Count (Selection Sort - Reverse Sorted),Copy Count (Selection Sort - Reverse Sorted),Comparison Count (Quick Sort - Random),Copy Count (Quick Sort - Random),Comparison Count (Quick Sort - Sorted),Copy Count (Quick Sort - Sorted),Comparison Count (Quick Sort - Reverse Sorted),Copy Count (Quick Sort - Reverse Sorted)\n";
+    outfile << "Array Size,"
+               "Comparison Count (Selection Sort - Random),Copy Count (Selection Sort - Random),"
+               "Comparison Count (Selection Sort - Sorted),Copy Count (Selection Sort - Sorted),"
+               "Comparison Count (Selection Sort - Reverse Sorted),Copy Count (Selection Sort - Reverse Sorted),"
+               "Comparison Count (Quick Sort - Random),Copy Count (Quick Sort - Random),"
+               "Comparison Count (Quick Sort - Sorted),Copy Count (Quick Sort - Sorted),"
+               "Comparison Count (Quick Sort - Reverse Sorted),Copy Count (Quick Sort - Reverse Sorted)\n";
 
     for (size_t size : sizes) {
         std::cout << std::endl << size << std::endl;
@@ -164,9 +174,8 @@ void perform_testing(const std::string& filename) {
             stats quick_random_stats = quick_sort(random_array);
             quick_random_comparison_counts.push_back(quick_random_stats.comparison_count);
             quick_random_copy_counts.push_back(quick_random_stats.copy_count);
-
-
         }
+
         std::vector<int> sorted_array = generate_sorted_array(size);
         std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
 
@@ -206,24 +215,18 @@ void perform_testing(const std::string& filename) {
     std::cout << "Testing completed. Results are saved in " << filename << std::endl;
 }
 
-
-// Function to display the menu
-void show_menu() {
-    std::cout << "Menu:\n";
-    std::cout << "1. Compare sorting algorithms for a random array\n";
-    std::cout << "2. Compare sorting algorithms for a sorted array\n";
-    std::cout << "3. Compare sorting algorithms for a reverse sorted array\n";
-    std::cout << "0. Exit\n";
-    std::cout << "Enter your choice: ";
-}
-
 int main() {
     std::string filename = "sorting_results.csv";
     perform_testing(filename);
 
     /*
     while (true) {
-        show_menu();
+        std::cout << "Menu:\n";
+        std::cout << "1. Compare sorting algorithms for a random array\n";
+        std::cout << "2. Compare sorting algorithms for a sorted array\n";
+        std::cout << "3. Compare sorting algorithms for a reverse sorted array\n";
+        std::cout << "0. Exit\n";
+        std::cout << "Enter your choice: ";
 
         int choice;
         std::cin >> choice;
@@ -265,7 +268,8 @@ int main() {
         }
 
         std::cout << std::endl;
-    }*/
+    }
+     */
 
     return 0;
 }
