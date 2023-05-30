@@ -48,39 +48,57 @@ stats selection_sort(std::vector<int>& array) {
 
     return sort_stats;
 }
+std::vector<int>::iterator left_v(std::vector<int> &vec){
+    return vec.begin();
+}
 
-void quick_sort_func(std::vector<int>& array, size_t N, stats& result) {
-    size_t i = 0, j = N;
-    int pivot = array[N >> 1];
+std::vector<int>::iterator right_v(std::vector<int> &vec){
+    return vec.end()-1;
+}
 
-    while (i <= j) {
-        while (array[i] < pivot) {
-            ++result.comparison_count;
-            ++i;
+
+void quick_sort_f(std::vector<int> &vec, std::vector<int>::iterator left, std::vector<int>::iterator right, stats &stat){
+    auto it_left = left;
+
+    auto it_right = right;
+
+    auto it_middle = left + (right - left) / 2+1;
+
+    int pivot = *it_middle;
+
+    while (it_left <= it_right) {
+        while (*it_left < pivot) {
+            it_left++;
+            stat.comparison_count++;
         }
-        while (array[j] > pivot) {
-            ++result.comparison_count;
-            --j;
+        while (*it_right > pivot) {
+            it_right--;
+            stat.comparison_count++;
         }
-        if (i <= j) {
-            std::swap(array[i], array[j]);
-            ++result.copy_count;
-            ++i;
-            --j;
+        if (it_left < it_right) {
+            std::swap(*it_left, *it_right);
+            it_left++;
+            it_right--;
+            stat.copy_count++;
+        }
+        else if (it_left == it_right) {
+            it_left++;
+            it_right--;
         }
     }
-    if (j > 0) {
-        quick_sort_func(array, j, result);
+
+    if (left < it_right) {
+        quick_sort_f(vec, left, it_right,  stat);
     }
-    if (N > i) {
-        quick_sort_func(array , N - i, result);
+    if (it_left < right) {
+        quick_sort_f(vec, it_left, right,  stat);
     }
 }
 
-stats quick_sort(std::vector<int>& array) {
-    stats result;
-    quick_sort_func(array, array.size() - 1, result);
-    return result;
+stats quick_sort(std::vector<int> &vec){
+    stats stat;
+    quick_sort_f(vec, left_v(vec), right_v(vec), stat);
+    return stat;
 }
 
 // Генератор случайных чисел
@@ -125,7 +143,7 @@ double calculate_average(const std::vector<double>& array) {
 
 // Function to perform the testing and write results to a CSV file
 void perform_testing(const std::string& filename) {
-    std::vector<size_t> sizes = { 10, 40, 80, 100, 120, 160, 200, 250, 300 };
+    std::vector<size_t> sizes = { 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000 };
 
     std::ofstream outfile(filename);
     if (!outfile) {
@@ -186,7 +204,7 @@ void perform_testing(const std::string& filename) {
 
         // reverse sorted
         std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
-
+даня какашка
         stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
         selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
         selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
