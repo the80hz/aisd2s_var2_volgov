@@ -49,44 +49,39 @@ stats selection_sort(std::vector<int>& array) {
     return sort_stats;
 }
 
-
-stats quick_sort_helper(std::vector<int>& array, int left, int right) {
-    stats sort_stats;
-    int i = left, j = right;
-    int tmp;
-    int pivot = array[(left + right) / 2];
+void quick_sort_func(std::vector<int>& array, size_t N, stats& result) {
+    size_t i = 0, j = N;
+    int pivot = array[N >> 1];
 
     while (i <= j) {
-        ++sort_stats.comparison_count;
-        while (array[i] < pivot)
-            i++;
-        ++sort_stats.comparison_count;
-        while (array[j] > pivot)
-            j--;
-        ++sort_stats.comparison_count;
+        while (array[i] < pivot) {
+            ++result.comparison_count;
+            ++i;
+        }
+        while (array[j] > pivot) {
+            ++result.comparison_count;
+            --j;
+        }
         if (i <= j) {
-            ++sort_stats.copy_count;
-            tmp = array[i];
-            array[i] = array[j];
-            array[j] = tmp;
-            i++;
-            j--;
+            std::swap(array[i], array[j]);
+            ++result.copy_count;
+            ++i;
+            --j;
         }
     }
-
-    if (left < j)
-        quick_sort_helper(array, left, j);
-    if (i < right)
-        quick_sort_helper(array, i, right);
-
-    return sort_stats;
+    if (j > 0) {
+        quick_sort_func(array, j, result);
+    }
+    if (N > i) {
+        quick_sort_func(array , N - i, result);
+    }
 }
 
-// quick sort
 stats quick_sort(std::vector<int>& array) {
-    return quick_sort_helper(array, 0, array.size() - 1);
+    stats result;
+    quick_sort_func(array, array.size() - 1, result);
+    return result;
 }
-
 
 // Генератор случайных чисел
 std::vector<int> generate_random_array(size_t size) {
@@ -99,7 +94,6 @@ std::vector<int> generate_random_array(size_t size) {
     }
     return result;
 }
-
 
 // Генератор отсортированных чисел
 std::vector<int> generate_sorted_array(size_t size) {
@@ -163,6 +157,7 @@ void perform_testing(const std::string& filename) {
         std::vector<double> quick_reverse_sorted_comparison_counts;
         std::vector<double> quick_reverse_sorted_copy_counts;
 
+        // random
         for (size_t i = 0; i < 100; ++i) {
             std::cout << i << " ";
             std::vector<int> random_array = generate_random_array(size);
@@ -171,25 +166,32 @@ void perform_testing(const std::string& filename) {
             selection_random_comparison_counts.push_back(selection_random_stats.comparison_count);
             selection_random_copy_counts.push_back(selection_random_stats.copy_count);
 
+            random_array = generate_random_array(size);
+
             stats quick_random_stats = quick_sort(random_array);
             quick_random_comparison_counts.push_back(quick_random_stats.comparison_count);
             quick_random_copy_counts.push_back(quick_random_stats.copy_count);
         }
 
+        // sorted
         std::vector<int> sorted_array = generate_sorted_array(size);
-        std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
 
         stats selection_sorted_stats = selection_sort(sorted_array);
         selection_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
         selection_sorted_copy_counts.push_back(selection_sorted_stats.copy_count);
 
+        stats quick_sorted_stats = quick_sort(sorted_array);
+        quick_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
+        quick_sorted_copy_counts.push_back(quick_sorted_stats.copy_count);
+
+        // reverse sorted
+        std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
+
         stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
         selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
         selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
 
-        stats quick_sorted_stats = quick_sort(sorted_array);
-        quick_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
-        quick_sorted_copy_counts.push_back(quick_sorted_stats.copy_count);
+        reverse_sorted_array = generate_reverse_sorted_array(size);
 
         stats quick_reverse_sorted_stats = quick_sort(reverse_sorted_array);
         quick_reverse_sorted_comparison_counts.push_back(quick_reverse_sorted_stats.comparison_count);
