@@ -204,7 +204,7 @@ void perform_testing(const std::string& filename) {
 
         // reverse sorted
         std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
-
+даня какашка
         stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
         selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
         selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
