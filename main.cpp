@@ -56,7 +56,6 @@ std::vector<int>::iterator right_v(std::vector<int> &vec){
     return vec.end()-1;
 }
 
-
 void quick_sort_f(std::vector<int> &vec, std::vector<int>::iterator left, std::vector<int>::iterator right, stats &stat){
     auto it_left = left;
 
@@ -95,6 +94,7 @@ void quick_sort_f(std::vector<int> &vec, std::vector<int>::iterator left, std::v
     }
 }
 
+// Быстрая сортировка
 stats quick_sort(std::vector<int> &vec){
     stats stat;
     quick_sort_f(vec, left_v(vec), right_v(vec), stat);
@@ -204,7 +204,6 @@ void perform_testing(const std::string& filename) {
 
         // reverse sorted
         std::vector<int> reverse_sorted_array = generate_reverse_sorted_array(size);
-даня какашка
         stats selection_reverse_sorted_stats = selection_sort(reverse_sorted_array);
         selection_reverse_sorted_comparison_counts.push_back(selection_reverse_sorted_stats.comparison_count);
         selection_reverse_sorted_copy_counts.push_back(selection_reverse_sorted_stats.copy_count);
