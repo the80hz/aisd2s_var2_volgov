@@ -26,9 +26,13 @@ size_t lcg() {
  * @param findOp find operation
  */
 template<typename Container>
-void testContainer(const std::string& containerName, int containerSize, int fillAttempts,
-                   int searchAttempts, int addRemoveAttempts,
-                   std::function<void(Container&, int)> insertOp, std::function<bool(Container&, int)> findOp) {
+void testContainer(const std::string& containerName,
+                   int containerSize,
+                   int fillAttempts,
+                   int searchAttempts,
+                   int addRemoveAttempts,
+                   std::function<void(Container&, int)> insertOp,
+                   std::function<bool(Container&, int)> findOp) {
     using namespace std::chrono;
 
 
@@ -83,44 +87,10 @@ void testContainer(const std::string& containerName, int containerSize, int fill
 }
 
 /**
- * @brief Function for CustomSet and std::vector containers with different sizes
- * @param set1 first set
- * @param set2 second set
- * @return set containing elements from both sets
+ * @brief Main function
+ * @return exit code
  */
-CustomSet customSetUnion(const CustomSet& set1, const CustomSet& set2) { // Union of two sets
-    CustomSet result = set1; // Copy the elements of set1 into result
-    for (int key : set2.getSortedElements()) { // Iterate over the elements of set2
-        result.insert(key); // Insert the elements of set2 into result, duplicates will be ignored
-    }
-    return result; // Return the result
-}
-
-/**
- * @brief Function for CustomSet and std::vector containers with different sizes
- * @param set1 first set
- * @param set2 second set
- * @return set containing elements that are in both sets
- */
-CustomSet customSetSymmetricDifference(const CustomSet& set1, const CustomSet& set2) { // Symmetric difference of two sets
-    CustomSet result; // Create an empty set
-    for (int key : set1.getSortedElements()) { // Iterate over the elements of set1
-        if (!set2.contains(key)) { // If the element is not in set2
-            result.insert(key); // Insert elements from set1 that are not in set2
-        }
-    }
-    for (int key : set2.getSortedElements()) { // Iterate over the elements of set2
-        if (!set1.contains(key)) { // If the element is not in set1
-            result.insert(key); // Insert elements from set2 that are not in set1
-        }
-    }
-    return result; // Return the result
-}
-
-/**
- * @brief Test function for CustomSet and std::vector containers with different sizes
- */
-void test1(){
+int main() {
     int fillAttempts = 100;
     int searchAttempts = 1000;
     int addRemoveAttempts = 1000;
@@ -146,13 +116,6 @@ void test1(){
     testContainer<std::vector<int>>("std::vector<int>", 100000, fillAttempts, searchAttempts, addRemoveAttempts,
                                     [](std::vector<int>& container, int value) { container.insert(container.end(), value); },
                                     [](std::vector<int>& container, int value) { return std::find(container.begin(), container.end(), value) != container.end(); });
-}
-
-/**
- * @brief Main function
- * @return exit code
- */
-int main() {
 
     return 0;
 }

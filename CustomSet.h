@@ -6,7 +6,6 @@
 #define AISD2S_VAR4_VOLGOV_CUSTOMSET_H
 
 #include <iostream>
-#include <vector>
 
 /**
  * CustomSet is a set of integers implemented as a binary search tree.
@@ -64,13 +63,6 @@ public:
      * @return true if the key was erased, false if the key was not in the set
      */
     bool erase(int key); // erase a key
-
-    /**
-     * @brief Returns the number of elements in the set.
-     * @return number of elements in the set
-     */
-    [[nodiscard]]
-    std::vector<int> getSortedElements() const; // get the sorted elements
 
 private:
     struct Node {
@@ -138,13 +130,6 @@ private:
      * @return true if the key was erased, false if the key was not in the tree
      */
     bool erase(Node*& node, int key); // erase a key
-
-    /**
-     * @brief Traverses the tree in ascending order.
-     * @param node root of the tree
-     * @param elements vector to store the elements
-     */
-    void inorderTraversal(Node* node, std::vector<int>& elements) const; // traverse the tree in ascending order
 };
 
 

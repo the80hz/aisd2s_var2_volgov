@@ -173,27 +173,3 @@ bool CustomSet::erase(CustomSet::Node *&node, int key) {
         return true; // Element deleted
     }
 }
-
-/**
- * @brief Returns the number of elements in the set.
- * @return number of elements in the set
- */
-std::vector<int> CustomSet::getSortedElements() const { // get the elements in ascending order
-    std::vector<int> elements; // create a vector to store the elements
-    inorderTraversal(root, elements); // call the inorderTraversal function
-    return elements; // return the elements
-}
-
-/**
- * @brief Traverses the tree in ascending order.
- * @param node root of the tree
- * @param elements vector to store the elements
- */
-void CustomSet::inorderTraversal(CustomSet::Node *node, std::vector<int> &elements) const { // traverse the tree in ascending order
-    if (node == nullptr) { // check if the node is null
-        return;
-    }
-    inorderTraversal(node->left, elements); // call the inorderTraversal function for the left child
-    elements.push_back(node->key); // add the key to the vector
-    inorderTraversal(node->right, elements); // call the inorderTraversal function for the right child
-}
