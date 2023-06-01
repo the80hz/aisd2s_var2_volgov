@@ -35,9 +35,8 @@ stats selection_sort(std::vector<int>& array) {
 
         for (size_t j = i + 1; j < array.size(); ++j) {
             ++sort_stats.comparison_count;
-            if (array[j] < array[min_index]) {
+            if (array[j] < array[min_index])
                 min_index = j;
-            }
         }
 
         if (min_index != i) {
@@ -48,6 +47,7 @@ stats selection_sort(std::vector<int>& array) {
 
     return sort_stats;
 }
+
 std::vector<int>::iterator left_v(std::vector<int> &vec){
     return vec.begin();
 }
@@ -56,7 +56,7 @@ std::vector<int>::iterator right_v(std::vector<int> &vec){
     return vec.end()-1;
 }
 
-void quick_sort_f(std::vector<int> &vec, std::vector<int>::iterator left, std::vector<int>::iterator right, stats &stat){
+void quick_sort_f(std::vector<int>::iterator left, std::vector<int>::iterator right, stats &stat){
     auto it_left = left;
 
     auto it_right = right;
@@ -85,19 +85,17 @@ void quick_sort_f(std::vector<int> &vec, std::vector<int>::iterator left, std::v
             it_right--;
         }
     }
-
-    if (left < it_right) {
-        quick_sort_f(vec, left, it_right,  stat);
-    }
-    if (it_left < right) {
-        quick_sort_f(vec, it_left, right,  stat);
-    }
+    if (left < it_right)
+        quick_sort_f(left, it_right,  stat);
+    if (it_left < right)
+        quick_sort_f(it_left, right,  stat);
 }
 
 // Быстрая сортировка
 stats quick_sort(std::vector<int> &vec){
     stats stat;
-    quick_sort_f(vec, left_v(vec), right_v(vec), stat);
+    quick_sort_f(left_v(vec), right_v(vec), stat);
+
     return stat;
 }
 
@@ -107,27 +105,27 @@ std::vector<int> generate_random_array(size_t size) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, size-1);
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i)
         result[i] = dis(gen);
-    }
+
     return result;
 }
 
 // Генератор отсортированных чисел
 std::vector<int> generate_sorted_array(size_t size) {
     std::vector<int> result(size);
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i)
         result[i] = i;
-    }
+
     return result;
 }
 
 // Генератор обратно отсортированных чисел
 std::vector<int> generate_reverse_sorted_array(size_t size) {
     std::vector<int> result(size);
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i)
         result[i] = size - i;
-    }
+
     return result;
 }
 
@@ -135,15 +133,15 @@ std::vector<int> generate_reverse_sorted_array(size_t size) {
 // Function to calculate the average of a vector
 double calculate_average(const std::vector<double>& array) {
     double sum = 0;
-    for (double value : array) {
+    for (double value : array)
         sum += value;
-    }
+
     return sum / array.size();
 }
 
 // Function to perform the testing and write results to a CSV file
 void perform_testing(const std::string& filename) {
-    std::vector<size_t> sizes = { 100, 250, 500, 1000, 2500, 5000, 10000, 25000, 50000, 100000 };
+    std::vector<size_t> sizes = { 2000, 3000, 4000, 6000, 7000, 8000, 9000 };
 
     std::ofstream outfile(filename);
     if (!outfile) {
@@ -235,10 +233,9 @@ void perform_testing(const std::string& filename) {
 }
 
 int main() {
-    std::string filename = "sorting_results.csv";
-    perform_testing(filename);
+    // std::string filename = "sorting_results.csv";
+    // perform_testing(filename);
 
-    /*
     while (true) {
         std::cout << "Menu:\n";
         std::cout << "1. Compare sorting algorithms for a random array\n";
@@ -250,9 +247,9 @@ int main() {
         int choice;
         std::cin >> choice;
 
-        if (choice == 0) {
+        if (choice == 0)
             break;
-        } else if (choice >= 1 && choice <= 3) {
+        else if (choice >= 1 && choice <= 3) {
             size_t array_size;
             std::cout << "Enter the array size: ";
             std::cin >> array_size;
@@ -272,6 +269,13 @@ int main() {
             }
 
             stats selection_sort_stats = selection_sort(array);
+            if (choice == 1)
+                array = generate_random_array(array_size);
+            else if (choice == 2)
+                array = generate_sorted_array(array_size);
+            else if (choice == 3)
+                array = generate_reverse_sorted_array(array_size);
+
             stats quick_sort_stats = quick_sort(array);
 
             std::cout << "Comparisons and copies for a " << array_type << " array of size " << array_size << ":\n";
@@ -282,13 +286,11 @@ int main() {
             std::cout << "Quick Sort:\n";
             std::cout << "Comparison count: " << quick_sort_stats.comparison_count << std::endl;
             std::cout << "Copy count: " << quick_sort_stats.copy_count << std::endl;
-        } else {
+        } else
             std::cout << "Invalid choice. Please try again.\n";
-        }
 
         std::cout << std::endl;
     }
-     */
 
     return 0;
 }
