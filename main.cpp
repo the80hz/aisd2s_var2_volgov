@@ -48,53 +48,45 @@ stats selection_sort(std::vector<int>& array) {
     return sort_stats;
 }
 
-std::vector<int>::iterator left_v(std::vector<int> &vec){
-    return vec.begin();
-}
+void quick_sort_f(std::vector<int>::iterator left, std::vector<int>::iterator right, stats &stat) {
+    if (left >= right)
+        return;
 
-std::vector<int>::iterator right_v(std::vector<int> &vec){
-    return vec.end()-1;
-}
+    auto pivot = left + (right - left) / 2;
+    auto i = left;
+    auto j = right;
 
-void quick_sort_f(std::vector<int>::iterator left, std::vector<int>::iterator right, stats &stat){
-    auto it_left = left;
-
-    auto it_right = right;
-
-    auto it_middle = left + (right - left) / 2+1;
-
-    int pivot = *it_middle;
-
-    while (it_left <= it_right) {
-        while (*it_left < pivot) {
-            it_left++;
-            stat.comparison_count++;
+    while (i <= j) {
+        while (*i < *pivot) {
+            ++i;
+            ++stat.comparison_count;
         }
-        while (*it_right > pivot) {
-            it_right--;
-            stat.comparison_count++;
+        while (*j > *pivot) {
+            --j;
+            ++stat.comparison_count;
         }
-        if (it_left < it_right) {
-            std::swap(*it_left, *it_right);
-            it_left++;
-            it_right--;
-            stat.copy_count++;
+        if (i < j) {
+            std::swap(*i, *j);
+            ++stat.copy_count;
+            ++i;
+            --j;
         }
-        else if (it_left == it_right) {
-            it_left++;
-            it_right--;
+        else if (i == j) {
+            ++i;
+            --j;
         }
     }
-    if (left < it_right)
-        quick_sort_f(left, it_right,  stat);
-    if (it_left < right)
-        quick_sort_f(it_left, right,  stat);
+
+    if (left < j)
+        quick_sort_f(left, j, stat);
+    if (right > i)
+        quick_sort_f(i, right, stat);
 }
 
 // Быстрая сортировка
 stats quick_sort(std::vector<int> &vec){
     stats stat;
-    quick_sort_f(left_v(vec), right_v(vec), stat);
+    quick_sort_f(vec.begin(), vec.end() - 1, stat);
 
     return stat;
 }
@@ -141,7 +133,7 @@ double calculate_average(const std::vector<double>& array) {
 
 // Function to perform the testing and write results to a CSV file
 void perform_testing(const std::string& filename) {
-    std::vector<size_t> sizes = { 2000, 3000, 4000, 6000, 7000, 8000, 9000 };
+    std::vector<size_t> sizes = { 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 25000, 50000, 100000 };
 
     std::ofstream outfile(filename);
     if (!outfile) {
@@ -197,7 +189,7 @@ void perform_testing(const std::string& filename) {
         selection_sorted_copy_counts.push_back(selection_sorted_stats.copy_count);
 
         stats quick_sorted_stats = quick_sort(sorted_array);
-        quick_sorted_comparison_counts.push_back(selection_sorted_stats.comparison_count);
+        quick_sorted_comparison_counts.push_back(quick_sorted_stats.comparison_count);
         quick_sorted_copy_counts.push_back(quick_sorted_stats.copy_count);
 
         // reverse sorted
@@ -233,8 +225,9 @@ void perform_testing(const std::string& filename) {
 }
 
 int main() {
-    // std::string filename = "sorting_results.csv";
-    // perform_testing(filename);
+    std::string filename = "sorting_results.csv";
+    perform_testing(filename);
+
 
     while (true) {
         std::cout << "Menu:\n";
