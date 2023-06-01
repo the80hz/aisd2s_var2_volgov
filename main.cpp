@@ -172,8 +172,9 @@ void printMenu() {
 }
 
 int main() {
-    // test1();
-    std::map<int, CustomSet> trees;
+    test1();
+    return 0;
+    /*std::map<int, CustomSet> trees;
     int idCounter = 1;
 
     while (true) {
@@ -181,6 +182,7 @@ int main() {
 
         int choice;
         std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
         int id, id2;
         int element;
@@ -283,6 +285,5 @@ int main() {
             default:
                 std::cout << "Invalid choice. Please try again.\n";
         }
-    }
-    return 0;
+    }*/
 }

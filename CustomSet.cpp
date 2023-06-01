@@ -77,7 +77,7 @@ void CustomSet::clear(CustomSet::Node *node) { // destroy the tree
  * @param dest root of the destination tree
  * @param src root of the source tree
  */
-void CustomSet::copyTree(CustomSet::Node *&dest, const CustomSet::Node *src) { // copy the tree
+void CustomSet::copyTree(CustomSet::Node *&dest, CustomSet::Node *src) { // copy the tree
     if (src) { // check if the node is not null
         dest = new Node(src->key); // create a new node
         copyTree(dest->left, src->left); // call the copyTree function for the left child
@@ -89,7 +89,7 @@ void CustomSet::copyTree(CustomSet::Node *&dest, const CustomSet::Node *src) { /
  * @brief Prints the tree in ascending order.
  * @param node root of the tree
  */
-void CustomSet::printInOrder(const CustomSet::Node *node) { // print the tree in ascending order
+void CustomSet::printInOrder(CustomSet::Node *node) const { // print the tree in ascending order
     if (node) { // check if the node is not null
         printInOrder(node->left); // call the printInOrder function for the left child
         std::cout << node->key << " "; // print the key
@@ -125,7 +125,7 @@ bool CustomSet::insert(CustomSet::Node *&node, int key) {
  * @return true if the tree contains the key, false otherwise
  */
 [[nodiscard]]
-bool CustomSet::contains(const CustomSet::Node *node, int key) {
+bool CustomSet::contains(CustomSet::Node *node, int key) const {
     if (!node) { // Element not found
         return false; // Element not found
     }
