@@ -16,37 +16,37 @@ template<typename Vertex, typename Distance = double>
 class Graph {
 public:
     struct Edge {
-
+        Vertex from;
+        Vertex to;
+        Distance distance;
     };
 
-    // проверка-добавление-удаление вершин
     bool has_vertex(const Vertex& v) const;
     void add_vertex(const Vertex& v);
     bool remove_vertex(const Vertex& v);
     std::vector<Vertex> vertices() const;
 
-
-    //проверка-добавление-удаление ребер
-    void add_edge(const Vertex& from, const Vertex& to,
-                  const Distance& d);
+    void add_edge(const Vertex& from, const Vertex& to, const Distance& d);
     bool remove_edge(const Vertex& from, const Vertex& to);
-    bool remove_edge(const Edge& e); // с учетом расстояния
+    bool remove_edge(const Edge& e);
     bool has_edge(const Vertex& from, const Vertex& to) const;
-    bool has_edge (const Edge& e); //c учетом расстояния в Edge
+    bool has_edge(const Edge& e);
 
-    //получение всех ребер, выходящих из вершины
     std::vector<Edge> edges(const Vertex& vertex);
 
-    size_t order() const; //порядок
-    size_t degree() const; //степень
+    size_t order() const;
+    size_t degree() const;
 
+    std::vector<Edge> shortest_path(const Vertex& from, const Vertex& to) const;
+    std::vector<Vertex> walk(const Vertex& start_vertex) const;
 
-    // поиск кратчайшего пути Беллмана-Форда
-    std::vector<Edge> shortest_path(const Vertex& from,
-                                    const Vertex& to) const;
-    // обход в глубину
-    std::vector<Vertex>  walk(const Vertex& start_vertex)const;
+private:
+    std::unordered_map<Vertex, std::vector<Edge>> adjacency_list;
+
+    void walkHelper(const Vertex& current, std::unordered_map<Vertex, bool>& visited, std::vector<Vertex>& result) const;
 };
+
+// Определение методов
 
 
 #endif //AISD2S_VAR2_VOLGOV_GRAPH_H
