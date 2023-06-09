@@ -5,6 +5,7 @@
 #ifndef AISD2S_VAR2_VOLGOV_GRAPH_H
 #define AISD2S_VAR2_VOLGOV_GRAPH_H
 
+#include <iostream>
 #include <vector>
 #include <unordered_map>
 #include <queue>
@@ -95,10 +96,16 @@ public:
         return false;
     }
 
-    bool has_edge(const Edge& e) {
-        return has_edge(e.from, e.to, e.distance);
-    }
+    bool has_edge(const Edge& e) const {
+        if (has_vertex(e.from) && has_vertex(e.to)) {
+            const auto& edges = adjacency_list.at(e.from);
+            return std::any_of(edges.begin(), edges.end(), [&](const Edge& edge) {
+                return edge.to == e.to && edge.distance == e.distance;
+            });
+        }
 
+        return false;
+    }
 
     std::vector<Edge> edges(const Vertex& vertex) {
         std::vector<Edge> result;
@@ -196,6 +203,11 @@ public:
         }
 
         return result;
+    }
+
+    // get adjacency_list
+    const std::unordered_map<Vertex, std::vector<Edge>>& get_adjacency_list() const {
+        return adjacency_list;
     }
 
 private:
