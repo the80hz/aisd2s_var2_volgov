@@ -4,13 +4,14 @@
 #include "Graph.h"
 
 int findOptimalWarehouseLocation(const Graph<int, double>& graph) {
+    const std::vector<int> vertices = graph.vertices();
     double minMaxCost = std::numeric_limits<double>::max();
     int optimalPoint = 0;
 
-    for (const auto& vertex : graph.vertices()) {
+    for (const auto& vertex : vertices) {
         double maxCost = 0.0;
 
-        for (const auto& otherVertex : graph.vertices()) {
+        for (const auto& otherVertex : vertices) {
             if (vertex != otherVertex) {
                 auto shortestPath = graph.shortest_path(vertex, otherVertex);
                 double pathCost = 0.0;
@@ -31,6 +32,7 @@ int findOptimalWarehouseLocation(const Graph<int, double>& graph) {
 
     return optimalPoint;
 }
+
 
 // Функция для генерации случайного графа с n вершинами и m ребрами
 Graph<int, double> generateRandomGraph(int n, int m) {
