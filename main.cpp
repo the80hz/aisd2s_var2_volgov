@@ -1,11 +1,36 @@
 #include <iostream>
 #include <vector>
-#include <functional>
+
 #include "Graph.h"
 
-#include <iostream>
-#include <string>
-#include "Graph.h"
+int findOptimalWarehouseLocation(const Graph<int, double>& graph) {
+    double minMaxCost = std::numeric_limits<double>::max();
+    int optimalPoint = 0;
+
+    for (const auto& vertex : graph.vertices()) {
+        double maxCost = 0.0;
+
+        for (const auto& otherVertex : graph.vertices()) {
+            if (vertex != otherVertex) {
+                auto shortestPath = graph.shortest_path(vertex, otherVertex);
+                double pathCost = 0.0;
+
+                for (const auto& edge : shortestPath) {
+                    pathCost += edge.distance;
+                }
+
+                maxCost = std::max(maxCost, pathCost);
+            }
+        }
+
+        if (maxCost < minMaxCost) {
+            minMaxCost = maxCost;
+            optimalPoint = vertex;
+        }
+    }
+
+    return optimalPoint;
+}
 
 // Функция для генерации случайного графа с n вершинами и m ребрами
 Graph<int, double> generateRandomGraph(int n, int m) {
@@ -125,28 +150,14 @@ int main() {
                 std::cout << std::endl;
                 break;
             }
+            /* Пусть дан связный граф, в котором узлы – это торговые точки.
+             * Необходимо превратить одну из торговых точек в склад.
+             * Цена доставки от склада в точку зависит от расстояния.
+             * Найдите оптимальную с точки зрения максимальных затрат точку
+             * (т.е. точку, для которой максимальное расстояние до любой другой точки минимально)
+             */
             case 7: {
-                int end_vertex;
-                double max_cost = std::numeric_limits<double>::max();
-                int optimal_point = 0;
-
-                std::cout << "Enter the end vertex for warehouse location: ";
-                std::cin >> end_vertex;
-
-                for (const auto& vertex : graph.vertices()) {
-                    auto path = graph.shortest_path(vertex, end_vertex);
-                    double max_distance = 0.0;
-
-                    for (const auto& edge : path) {
-                        max_distance = std::max(max_distance, edge.distance);
-                    }
-
-                    if (max_distance < max_cost) {
-                        max_cost = max_distance;
-                        optimal_point = vertex;
-                    }
-                }
-
+                int optimal_point = findOptimalWarehouseLocation(graph);
                 std::cout << "Optimal point for warehouse placement: " << optimal_point << std::endl;
                 break;
             }

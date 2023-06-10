@@ -81,29 +81,41 @@ public:
         return false;
     }
 
+    // c учетом расстояния
     bool remove_edge(const Edge& e) {
-        return remove_edge(e.from, e.to);
-    }
-
-    bool has_edge(const Vertex& from, const Vertex& to, const Distance& distance) const {
-        if (has_vertex(from) && has_vertex(to)) {
-            const auto& edges = adjacency_list.at(from);
-            return std::any_of(edges.begin(), edges.end(), [&](const Edge& edge) {
-                return edge.to == to && edge.distance == distance;
+        if (has_vertex(e.from) && has_vertex(e.to)) {
+            auto& edges = adjacency_list[e.from];
+            auto it = std::find_if(edges.begin(), edges.end(), [&e](const Edge& edge) {
+                return edge.to == e.to && edge.distance == e.distance;
             });
+
+            if (it != edges.end()) {
+                edges.erase(it);
+                return true;
+            }
         }
 
         return false;
     }
 
+    bool has_edge(const Vertex& from, const Vertex& to) const {
+        if (has_vertex(from) && has_vertex(to)) {
+            const auto& edges = adjacency_list[from];
+            return std::find_if(edges.begin(), edges.end(), [&](const Edge& edge) {
+                return edge.to == to;
+            }) != edges.end();
+        }
+        return false;
+    }
+
+    // c учетом distance в Edge
     bool has_edge(const Edge& e) const {
         if (has_vertex(e.from) && has_vertex(e.to)) {
-            const auto& edges = adjacency_list.at(e.from);
-            return std::any_of(edges.begin(), edges.end(), [&](const Edge& edge) {
+            const auto& edges = adjacency_list[e.from];
+            return std::find_if(edges.begin(), edges.end(), [&e](const Edge& edge) {
                 return edge.to == e.to && edge.distance == e.distance;
-            });
+            }) != edges.end();
         }
-
         return false;
     }
 
